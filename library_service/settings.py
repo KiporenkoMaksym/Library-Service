@@ -11,11 +11,13 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv = (BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env")
+
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY",
                             "django-insecure-e7kfdu&&@rb=w5vkhrk6!"
                             "22&tms34$q87etyrj@y2=_l@gad#u"
@@ -24,7 +26,6 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY",
 DEBUG = os.getenv("DEBUG") == "True"
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -131,9 +132,8 @@ MAILERS = {
 }
 
 REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": (
-        "rest_framework.pagination.BookPagination",
-    ),
+    "DEFAULT_PAGINATION_CLASS":
+        "rest_framework.pagination.PageNumberPagination",
 
     "DEFAULT_RENDERER_CLASSES": (
         "rest_framework.renderers.JSONRenderer",

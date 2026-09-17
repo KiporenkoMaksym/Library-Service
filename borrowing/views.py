@@ -20,8 +20,8 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return [int(str_id) for str_id in qs.split(",")]
 
     def get_queryset(self):
-        user_id = self.request.query_params.get("user")
-        is_active = self.request.query_params.get("actual_return_date")
+        user_id = self.request.query_params.get("user_id")
+        is_active = self.request.query_params.get("is_active")
 
         queryset = self.queryset
 
@@ -30,9 +30,10 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(user_id__in=user_ids)
 
         if is_active:
-            queryset = queryset.filter(actual_return_date__isnull=True)
-        else:
-            queryset = queryset.filter(actual_return_date__isnull=False)
+            if is_active.lower() == "true":
+                queryset = queryset.filter(actual_return_date__isnull=True)
+            elif is_active.lower() == "false":
+                queryset = queryset.filter(actual_return_date__isnull=False)
 
         return queryset
 
@@ -43,8 +44,8 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
         return BorrowingSerializer
 
-    @action(detail=True, methods=["post"])
-    def book_return(self):
+    @action(detail=True, methods=["post"], url_path="return")
+    def book_return(self, request, pk=None):
         borrowing = self.get_object()
 
         if borrowing.actual_return_date:
