@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from borrowing.models import Borrowing, Payment
@@ -16,23 +17,18 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "book",
         )
 
+    def create(self, validated_data):
+        with transaction.atomic():
+            book = validated_data["book"]
 
-class BorrowingListSerializer(BorrowingSerializer):
-    book = serializers.SlugRelatedField(
-        source="book",
-        slug_field="title",
-        read_only=True,
-    )
-    class Meta:
-        model = Borrowing
-        fields = (
-            "id",
-            "borrow_date",
-            "expected_return_date",
-            "actual_return_date",
-            "user",
-            "book",
-        )
+            if book.inventory <= 0:
+                raise serializers.ValidationError("Book is out of stock")
+
+            borrowing = Borrowing.objects.create(**validated_data)
+
+            book.inventory -= 1
+            book.save(update_fields=["inventory"])
+            return borrowing
 
 
 class BorrowingDetailSerializer(BorrowingSerializer):
