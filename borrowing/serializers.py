@@ -36,8 +36,8 @@ class BorrowingDetailSerializer(BorrowingSerializer):
         source="first_last_name"
     )
     book = serializers.SlugRelatedField(
-        source="book",
         slug_field="title",
+        read_only=True,
     )
 
     class Meta:
