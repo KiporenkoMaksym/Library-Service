@@ -1,11 +1,17 @@
 from datetime import date
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from borrowing.models import Borrowing
-from borrowing.serializers import BorrowingSerializer, BorrowingDetailSerializer
+from borrowing.serializers import (
+    BorrowingSerializer,
+    BorrowingDetailSerializer,
+    BorrowingReturnSerializer
+)
+from user.permissions import IsAuthenticatedOrAdmin
 
 
 class BorrowingViewSet(viewsets.ModelViewSet):
@@ -14,16 +20,21 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         .select_related("user", "book")
     )
     serializer_class = BorrowingSerializer
+    permission_classes = [IsAuthenticatedOrAdmin]
 
     @staticmethod
     def _params_to_ints(qs):
         return [int(str_id) for str_id in qs.split(",")]
 
     def get_queryset(self):
+        queryset = self.queryset
+
+        user = self.request.user
         user_id = self.request.query_params.get("user_id")
         is_active = self.request.query_params.get("is_active")
 
-        queryset = self.queryset
+        if not user.is_staff:
+            return queryset.filter(user=user)
 
         if user_id:
             user_ids = self._params_to_ints(user_id)
@@ -38,14 +49,19 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self):
+        if self.action == "return_borrowing":
+            return BorrowingReturnSerializer
 
         if self.action == "retrieve":
             return BorrowingDetailSerializer
 
         return BorrowingSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     @action(detail=True, methods=["post"], url_path="return")
-    def book_return(self, request, pk=None):
+    def return_borrowing(self, request, pk=None):
         borrowing = self.get_object()
 
         if borrowing.actual_return_date:
@@ -65,3 +81,22 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             {"detail": "Book returned successfully"},
             status=status.HTTP_200_OK,
         )
+
+    @extend_schema(
+        summary="Get list of borrowings",
+        description="Get a list of borrowings with optional filtering by user_id and is_active.",
+        parameters=[
+            OpenApiParameter(
+                name='user_id',
+                type={"type": "array", "items": {"type": "integer"}},
+                description="Filter by users id (ex. ?user_id=1,2,3)"
+            ),
+            OpenApiParameter(
+                name='is_active',
+                type=bool,
+                description="Filter by active borrowing (ex. ?is_active=bool)"
+            ),
+        ],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
