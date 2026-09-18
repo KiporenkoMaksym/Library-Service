@@ -16,6 +16,7 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "user",
             "book",
         )
+        read_only_fields = ("id", "actual_return_date", "user")
 
     def create(self, validated_data):
         with transaction.atomic():
@@ -29,6 +30,13 @@ class BorrowingSerializer(serializers.ModelSerializer):
             book.inventory -= 1
             book.save(update_fields=["inventory"])
             return borrowing
+
+
+class BorrowingReturnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Borrowing
+        fields = ("actual_return_date",)
+        extra_kwargs = {"actual_return_date": {"required": True}, "read_only": False}
 
 
 class BorrowingDetailSerializer(BorrowingSerializer):

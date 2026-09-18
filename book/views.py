@@ -1,5 +1,4 @@
 from rest_framework import viewsets
-from rest_framework.pagination import PageNumberPagination
 
 from book.models import Book
 from book.serializers import (
@@ -7,11 +6,13 @@ from book.serializers import (
     BookListSerializer,
     BookDetailSerializer
 )
+from user.permissions import IsAdminOrReadOnly
 
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):
 
@@ -22,8 +23,3 @@ class BookViewSet(viewsets.ModelViewSet):
             return BookDetailSerializer
 
         return BookSerializer
-
-
-class BookPagination(PageNumberPagination):
-    page_size = 5
-    max_page_size = 100
