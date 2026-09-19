@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from borrowing.models import Borrowing, Payment
+from borrowing.models import Borrowing
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
 
 class BorrowingDetailSerializer(BorrowingSerializer):
     user = serializers.ReadOnlyField(
-        source="first_last_name"
+        source="user.email"
     )
     book = serializers.SlugRelatedField(
         slug_field="title",
@@ -57,32 +57,4 @@ class BorrowingDetailSerializer(BorrowingSerializer):
             "actual_return_date",
             "user",
             "book",
-        )
-
-
-class PaymentSerializer(serializers.ModelSerializer):
-    borrowing = serializers.SlugRelatedField(
-        source="borrowing",
-        slug_field="first_last_name",
-        read_only=True,
-    )
-
-    class Meta:
-        model = Payment
-        fields = (
-            "id",
-            "status",
-            "type",
-            "borrowing",
-            "session_url",
-            "session_id",
-            "money_to_pay",
-        )
-
-        read_only_fields = (
-            "id",
-            "status",
-            "session_url",
-            "session_id",
-            "money_to_pay",
         )

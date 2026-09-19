@@ -17,7 +17,7 @@ def sample_book(**params):
         "author": "Sample Author",
         "cover": "HARD",
         "inventory": 10,
-        "daily_free": 5,
+        "daily_fee": 5,
     }
     defaults.update(params)
 
@@ -44,7 +44,7 @@ class PublicBookApiTests(TestCase):
             "author": "Test Author",
             "cover": "HARD",
             "inventory": 10,
-            "daily_free": 5,
+            "daily_fee": 5,
         }
 
         res = self.client.post(BOOK_URL, payload)
@@ -80,7 +80,7 @@ class PrivateBookApiTests(TestCase):
             "author": "Test Author",
             "cover": "HARD",
             "inventory": 10,
-            "daily_free": 5,
+            "daily_fee": 5,
         }
 
         res = self.client.post(BOOK_URL, payload)
@@ -106,7 +106,7 @@ class AdminBookApiTest(TestCase):
             "author": "Test Author",
             "cover": "HARD",
             "inventory": 10,
-            "daily_free": 5,
+            "daily_fee": 5,
         }
 
         res = self.client.post(BOOK_URL, payload)
