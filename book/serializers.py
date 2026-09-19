@@ -12,13 +12,13 @@ class BookSerializer(serializers.ModelSerializer):
             "author",
             "cover",
             "inventory",
-            "daily_free",
+            "daily_fee",
         )
 
 
 class BookListSerializer(BookSerializer):
     inventory = serializers.IntegerField(read_only=True)
-    daily_free = serializers.DecimalField(read_only=True, max_digits=6, decimal_places=2)
+    daily_fee = serializers.DecimalField(read_only=True, max_digits=6, decimal_places=2)
 
     class Meta:
         model = Book
@@ -28,7 +28,7 @@ class BookListSerializer(BookSerializer):
             "author",
             "cover",
             "inventory",
-            "daily_free",
+            "daily_fee",
         )
 
 
@@ -42,5 +42,5 @@ class BookDetailSerializer(BookSerializer):
             "author",
             "cover",
             "inventory",
-            "daily_free",
+            "daily_fee",
         )

@@ -28,8 +28,27 @@ DEBUG = os.getenv("DEBUG") == "True"
 
 ALLOWED_HOSTS = []
 
-# Application definition
+# Telegram Settings
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
+#Stripe Settings
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "check-overdue-borrowings-every-day": {
+        "task": "notifications.tasks.check_overdue_borrowings",
+        "schedule": crontab(hour=9, minute=0),
+    },
+}
+
+# Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -44,6 +63,7 @@ INSTALLED_APPS = [
     "book",
     "borrowing",
     "user",
+    "payment",
 ]
 
 AUTH_USER_MODEL = "user.User"
@@ -119,6 +139,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+CELERY_TIMEZONE = TIME_ZONE
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
@@ -181,3 +202,5 @@ SPECTACULAR_SETTINGS = {
         "defaultModelExpandDepth": 2,
     }
 }
+
+CELERY_TASK_ALWAYS_EAGER = True

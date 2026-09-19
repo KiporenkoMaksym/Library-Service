@@ -20,7 +20,7 @@ def sample_borrowing(**params):
         title="Test Book",
         author="Test Author",
         inventory=5,
-        daily_free=2.00
+        daily_fee=2.00
     )
 
     defaults = {
